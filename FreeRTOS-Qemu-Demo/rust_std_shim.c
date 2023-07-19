@@ -1,0 +1,1 @@
+/home/shiro/projects/rust/rust/library/std/src/sys/freertos/rust_std_shim.c
