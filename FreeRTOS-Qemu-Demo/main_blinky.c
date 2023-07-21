@@ -128,7 +128,7 @@ const TickType_t xTimerPeriod = mainTIMER_SEND_FREQUENCY_MS;
 		xTaskCreate( prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
 
 		//xTaskCreate( vRustTickerTask, "RustTicker", 10 * 1024, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
-		//vRustTickerTask(NULL);
+		vRustTickerTask(NULL);
 
 
 		/* Create the software timer, but don't start it yet. */

@@ -1,5 +1,5 @@
 target remote localhost:1234
-file build/gcc/output/RTOSDemo.out
+file output/RTOSDemo.out
 b prvGetRegistersFromStack
 b panic_fmt
 b panic_misaligned_pointer_dereference
