@@ -19,9 +19,6 @@ use std::sync::{
     Arc, Barrier,
 };
 
-extern "C" {
-    fn printf(fmt: *const u8, ...) -> c_int;
-}
 
 #[allow(non_snake_case)]
 #[no_mangle]

@@ -1,15 +1,18 @@
+
+# Paths to other componenets
+KERNEL_DIR = ./../FreeRTOS-Kernel
+RUST_APP_ROOT = ./../rust-app
+RUST_STD_ROOT = ./../freertos-std
+
+# Build output
 OUTPUT_DIR := ./output
 IMAGE := RTOSDemo.out
-SUB_MAKEFILE_DIR = ./library-makefiles
 
-# The directory that contains the /source and /demo sub directories.
-FREERTOS_ROOT = ./../
-
+# Compiler config
 CC = arm-none-eabi-gcc
 LD = arm-none-eabi-gcc
 SIZE = arm-none-eabi-size
 MAKE = make
-
 
 CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
 		  -Wall -Wextra -g3 -O0 -ffunction-sections -fdata-sections \
@@ -18,7 +21,6 @@ CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
 #
 # Kernel build.
 #
-KERNEL_DIR = $(FREERTOS_ROOT)/FreeRTOS-Kernel
 KERNEL_PORT_DIR += $(KERNEL_DIR)/portable/GCC/ARM_CM3
 INCLUDE_DIRS += -I$(KERNEL_DIR)/include \
 				-I$(KERNEL_PORT_DIR)
@@ -78,10 +80,11 @@ INCLUDE_DIRS += -I$(DEMO_PROJECT) -I$(DEMO_PROJECT)/CMSIS
 SOURCE_FILES += (DEMO_PROJECT)/main.c
 SOURCE_FILES += (DEMO_PROJECT)/main_blinky.c
 SOURCE_FILES += (DEMO_PROJECT)/main_full.c
-SOURCE_FILES += (DEMO_PROJECT)/rust_std_shim.c
 SOURCE_FILES += ./startup_gcc.c
-# Lightweight print formatting to use in place of the heavier GCC equivalent.
 SOURCE_FILES += ./printf-stdarg.c
+
+# Need to include the shim library into the build
+SOURCE_FILES += (RUST_STD_ROOT)/src/sys/freertos/rust_std_shim.c
 
 #Create a list of object files with the desired output directory path.
 OBJS = $(SOURCE_FILES:%.c=%.o)
@@ -92,12 +95,6 @@ OBJS_OUTPUT = $(OBJS_NO_PATH:%.o=$(OUTPUT_DIR)/%.o)
 DEP_FILES := $(SOURCE_FILES:%.c=$(OUTPUT_DIR)/%.d)
 DEP_FILES_NO_PATH = $(notdir $(DEP_FILES))
 DEP_OUTPUT = $(DEP_FILES_NO_PATH:%.d=$(OUTPUT_DIR)/%.d)
-
-RUST_APP_ROOT = ./../rust-app
-
-# those libs should be pulled in due to the staticlib setting in rust, but this is not the case
-
-# RUST_LIBS =
 
 all: $(OUTPUT_DIR)/$(IMAGE)
 
