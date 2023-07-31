@@ -16,7 +16,7 @@ checksum = "f4ceb2be7a1b493d08a8908fdc2555921b28f3daef84d518ea9ed7d336f852f2"
 
 [[package]]
 name = "freertos-std"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "cfg-if",
  "compiler_builtins",

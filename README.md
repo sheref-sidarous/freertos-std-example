@@ -24,6 +24,3 @@ $ make
 $ cd FreeRTOS-Qemu-Demo
 $ qemu-system-arm -machine mps2-an385 -cpu cortex-m3 -kernel output/RTOSDemo.out -monitor none -nographic -serial stdio -s
 ```
-
-## Notes
-* The build system needs to grab additional libraries from Rust's toolchain home folder, have a look at the makefile's `rust-runtime-libs` target
