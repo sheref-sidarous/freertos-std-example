@@ -103,7 +103,7 @@ $(OUTPUT_DIR)/%.o : %.c $(OUTPUT_DIR)/%.d Makefile
 	mkdir -p $(OUTPUT_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) Makefile rust-app-lib rust-runtime-libs
+$(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) Makefile rust-app-lib
 	@echo ""
 	@echo ""
 	@echo "--- Final linking ---"
