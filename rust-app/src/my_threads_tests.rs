@@ -7,7 +7,8 @@ use std::sync::Mutex;
 use std::thread;
 use std::time;
 use std::cell::RefCell;
-use std::sync::{self, Arc, RwLock};
+use std::sync::{self, Arc, RwLock, Condvar, mpsc};
+
 
 // Test join : that a parent thread will block until the child thread is terminanted with a value, and the value is correct
 fn test_join() {
@@ -135,53 +136,161 @@ fn test_Once () {
 }
 
 // Read / Write Locks
-fn test_RW_lock() {
+fn test_rw_lock_1() {
 
-    let data = Arc::new(RwLock::new(0)); // Wrap the data in an Arc and RwLock
+    let data = Arc::new(RwLock::new(10)); // Wrap the data in an Arc and RwLock
 
-    let reader1_data = data.clone(); // Clone the Arc for reader thread 1
-    let reader2_data = data.clone(); // Clone the Arc for reader thread 2
+    let reader_data = data.clone(); // Clone the Arc for reader thread
     let writer_data = data.clone();  // Clone the Arc for writer thread
 
+    // Hold a reader lock in the current thread
+    let read_data = data.read().unwrap();
+
+    // this reader thread should proceed anyway
     let reader1 = thread::spawn(move || {
-        let reader = reader1_data.read().unwrap(); // Read lock
-        println!("Reader 1: Data = {}", *reader);
-        // The read lock is automatically released when 'reader' goes out of scope
-    });
-
-    let reader2 = thread::spawn(move || {
-        let reader = reader2_data.read().unwrap(); // Read lock
-        println!("Reader 2: Data = {}", *reader);
-        // The read lock is automatically released when 'reader' goes out of scope
-    });
-
-    let writer = thread::spawn(move || {
-        let mut data = writer_data.write().unwrap(); // Write lock
-        *data += 42;
-        println!("Writer: Data modified to {}", *data);
-        // The write lock is automatically released when 'data' goes out of scope
+        let reader = reader_data.read().unwrap(); // Read lock
+        assert_eq!(*reader, 10);
     });
 
     reader1.join().unwrap();
-    reader2.join().unwrap();
+
+    // then, try to hold a writer thread
+    let writer = thread::spawn(move || {
+        let mut data = writer_data.write().unwrap(); // Write lock
+        *data += 42;
+        assert_eq!(*data, 52);
+    });
+
+    // sleep for a bit to allow writer some time
+    thread::sleep(time::Duration::from_millis(100));
+
+    // writer thread SHOULD NOT be finished
+    assert!(!writer.is_finished());
+
+    // and reader should still read 10
+    assert_eq!(*read_data, 10);
+
+    // release the read lock
+    drop(read_data);
+
+    // Now, writer should be able to finish
     writer.join().unwrap();
+
+    // if I acquired another Read lock is should read 52
+    let read_data_again = data.read().unwrap();
+    assert_eq!(*read_data_again, 52);
 
 }
 
- // Conditional variables
+fn test_rw_lock_2() {
 
- // send/recv
+    let data = Arc::new(RwLock::new(10)); // Wrap the data in an Arc and RwLock
 
- pub fn run_all_tests() {
+    let reader_data = data.clone(); // Clone the Arc for reader thread
 
-    //test_join();
+    // Hold a writer lock in the current thread
+    let mut writer = data.write().unwrap();
 
-    //test_sleep();
-    //test_thread_local_storage();
+    // this reader thread should block until writer is over
+    let reader_thread = thread::spawn(move || {
+        let reader = reader_data.read().unwrap(); // Read lock
+        assert_eq!(*reader, 52);
+    });
 
-    //test_mutex();
-    test_RW_lock();
+    // sleep for a bit to allow the thread some time
+    thread::sleep(time::Duration::from_millis(100));
 
-    //test_Once();
+    // writer thread SHOULD NOT be finished
+    assert!(!reader_thread.is_finished());
+
+    // write and release the write lock
+    *writer += 42;
+    drop(writer);
+
+    // Now, reader should be able to finish
+    reader_thread.join().unwrap();
+
+
+}
+
+
+// Conditional variables
+fn test_condvar() {
+    // Create shared data between threads
+    let data = Arc::new(Mutex::new(false));
+    let condvar = Arc::new(Condvar::new());
+
+    // Clone the data and condvar for use in multiple threads
+    let data_clone = Arc::clone(&data);
+    let condvar_clone = Arc::clone(&condvar);
+
+    // Create a thread that waits for the condition to be true
+    let thread1 = thread::spawn(move || {
+        let mut locked_data = data_clone.lock().unwrap();
+        while !*locked_data {
+            locked_data = condvar_clone.wait(locked_data).unwrap();
+        }
+        assert!(*locked_data);
+    });
+
+    // sleep for a bit to allow the thread some time
+    thread::sleep(time::Duration::from_millis(100));
+
+    // thread1 SHOULD NOT be finished
+    assert!(!thread1.is_finished());
+
+    // Create another thread that modifies the condition and signals the first thread
+    let thread2 = thread::spawn(move || {
+        thread::sleep(std::time::Duration::from_millis(100)); // Simulate some work
+        let mut locked_data = data.lock().unwrap();
+        *locked_data = true;
+        condvar.notify_one();
+    });
+
+    // Wait for both threads to finish
+    thread1.join().unwrap();
+    thread2.join().unwrap();
+}
+
+// send/recv
+fn test_mpsc() {
+    // Create a channel for communication
+    let (sender, receiver) = mpsc::channel();
+
+    // Spawn a thread that sends messages
+    let sender_thread = thread::spawn(move || {
+        for i in 0..5 {
+            sender.send(i).unwrap();
+            thread::sleep(std::time::Duration::from_millis(100));
+        }
+    });
+
+    // Receive messages in the main thread
+    let mut count_verify = 0;
+    for received in receiver {
+        assert_eq!(received, count_verify);
+        count_verify += 1;
+    }
+
+    // Wait for the sender thread to finish
+    sender_thread.join().unwrap();
+}
+
+
+pub fn run_all_tests() {
+
+    test_join();
+
+    test_sleep();
+    test_thread_local_storage();
+
+    test_mutex();
+    test_Once();
+    test_rw_lock_1();
+    test_rw_lock_2();
+
+    test_condvar();
+    test_mpsc();
+
 
 }
