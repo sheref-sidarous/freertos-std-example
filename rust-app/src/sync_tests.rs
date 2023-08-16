@@ -107,7 +107,7 @@ fn test_mutex() {
 }
 
 // TODO: a test Once where one of the functions panics
-fn test_Once () {
+fn test_once () {
 
     static mut UNPROTECED_SHARED_VAR : i32 = 0;
     static INCREMENT_ONCE : sync::Once = sync::Once::new();
@@ -285,12 +285,12 @@ pub fn run_all_tests() {
     test_thread_local_storage();
 
     test_mutex();
-    test_Once();
+    test_once();
     test_rw_lock_1();
     test_rw_lock_2();
 
     test_condvar();
     test_mpsc();
 
-
+    println!("All Sync tests ran successfully !!");
 }

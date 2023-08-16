@@ -20,9 +20,8 @@ use std::sync::{
     Arc, Barrier,
 };
 
-mod threads_tests;
 
-mod my_threads_tests;
+mod sync_tests;
 
 
 #[allow(non_snake_case)]
@@ -35,10 +34,6 @@ pub extern "C" fn vRustTickerTask() {
 
 fn threads_tests() {
 
-    my_threads_tests::run_all_tests();
-
-
-
-    println!("All tests done successfully !!");
+    sync_tests::run_all_tests();
 
 }
