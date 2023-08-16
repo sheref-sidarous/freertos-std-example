@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 #![feature(core_panic)]
 #![feature(fmt_internals)]
+#![feature(is_some_and)]
 
 // use freertos_rust::*;
 use core::ffi::c_char;
@@ -20,14 +21,22 @@ use std::sync::{
 };
 
 
+mod sync_tests;
+
+
 #[allow(non_snake_case)]
 #[no_mangle]
 pub extern "C" fn vRustTickerTask() {
 
-    thread::spawn( move || {
-        loop {
-            println!("Rust Tick! <3");
-            thread::sleep(Duration::from_millis(1000));
-        }
-    });
+    thread::spawn(main_thread);
+
+}
+
+fn main_thread() {
+
+    sync_tests::run_all_tests();
+    loop {
+        println!("Rust Tick! <3");
+        thread::sleep(Duration::from_millis(1000));
+    }
 }

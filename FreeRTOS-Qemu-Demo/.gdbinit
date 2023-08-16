@@ -1,3 +1,6 @@
+set print pretty on
+set pagination off
+python import freertos_gdb
 target remote localhost:1234
 file output/RTOSDemo.out
 b prvGetRegistersFromStack
