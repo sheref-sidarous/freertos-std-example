@@ -14,4 +14,12 @@ echo "Buidling the image ..."
 make
 
 echo "Running using Qemu. $DEBUG_MSG"
-qemu-system-arm -machine mps2-an385 -cpu cortex-m3 -kernel output/RTOSDemo.out -monitor none -nographic -serial stdio -s $DEBUG_ARG
+qemu-system-arm -machine mps2-an385 \
+                -cpu cortex-m3 \
+                -kernel output/RTOSDemo.out \
+                -monitor none \
+                -nographic \
+                -serial stdio \
+                -s \
+                --semihosting-config enable=on,target=native \
+                $DEBUG_ARG
