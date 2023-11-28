@@ -47,13 +47,11 @@ SECTIONS
 
     .text :
     {
-        __exidx_start = .;
-        *(.text)
+        *(.text*)
         *(.rodata*)
         *(.constdata*)
         _etext = .;
         _sidata = .;
-        __exidx_end = .;
     } > FLASH
 
     .data :
@@ -62,16 +60,33 @@ SECTIONS
         _data = .;
         _sdata = .;
         *(vtable)
-        *(.data)
+        *(.data*)
         _edata = .;
     } > RAM
+
+    .ARM.extab :
+    {
+        . = ALIGN(4);
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
+        . = ALIGN(4);
+    } >FLASH
+
+    .ARM :
+    {
+        . = ALIGN(4);
+        __exidx_start = .;
+        *(.ARM.exidx*)
+        /* *(.ARM.exidx* .gnu.linkonce.armexidx.*) */
+        __exidx_end = .;
+        . = ALIGN(4);
+    } >FLASH
 
     .bss :
     {
         . = ALIGN(8);
         _bss = .;
         _sbss = .;
-        *(.bss)
+        *(.bss*)
         _ebss = .;
     } > RAM
 
