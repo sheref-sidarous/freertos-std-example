@@ -1,10 +1,9 @@
-use super::Once;
-use crate::panic;
-use crate::sync::mpsc::channel;
-use crate::thread;
+use std::sync::Once;
+use std::panic;
+use std::sync::mpsc::channel;
+use std::thread;
 
-#[test]
-fn smoke_once() {
+pub fn smoke_once() {
     static O: Once = Once::new();
     let mut a = 0;
     O.call_once(|| a += 1);
@@ -13,8 +12,7 @@ fn smoke_once() {
     assert_eq!(a, 1);
 }
 
-#[test]
-fn stampede_once() {
+pub fn stampede_once() {
     static O: Once = Once::new();
     static mut RUN: bool = false;
 
@@ -49,8 +47,7 @@ fn stampede_once() {
     }
 }
 
-#[test]
-fn poison_bad() {
+pub fn poison_bad() {
     static O: Once = Once::new();
 
     // poison the once
@@ -77,8 +74,7 @@ fn poison_bad() {
     O.call_once(|| {});
 }
 
-#[test]
-fn wait_for_force_to_finish() {
+pub fn wait_for_force_to_finish() {
     static O: Once = Once::new();
 
     // poison the once

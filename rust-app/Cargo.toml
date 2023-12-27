@@ -11,3 +11,4 @@ crate-type = ["staticlib"] # Creates static lib
 
 [dependencies]
 std = {path = "../freertos-std", features = ["semihosted-stdio"], package = "freertos-std"}
+rand = { version = "0.8.5", default-features = false, features = ["alloc"] }

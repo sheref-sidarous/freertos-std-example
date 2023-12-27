@@ -1,14 +1,13 @@
-use crate::sync::atomic::{AtomicUsize, Ordering};
-use crate::sync::mpsc::channel;
-use crate::sync::{Arc, RwLock, RwLockReadGuard, TryLockError};
-use crate::thread;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc::channel;
+use std::sync::{Arc, RwLock, RwLockReadGuard, TryLockError};
+use std::thread;
 use rand::Rng;
 
 #[derive(Eq, PartialEq, Debug)]
 struct NonCopy(i32);
 
-#[test]
-fn smoke() {
+pub fn smoke() {
     let l = RwLock::new(());
     drop(l.read().unwrap());
     drop(l.write().unwrap());
@@ -16,8 +15,7 @@ fn smoke() {
     drop(l.write().unwrap());
 }
 
-#[test]
-fn frob() {
+pub fn frob() {
     const N: u32 = 10;
     const M: usize = if cfg!(miri) { 100 } else { 1000 };
 
@@ -28,7 +26,7 @@ fn frob() {
         let tx = tx.clone();
         let r = r.clone();
         thread::spawn(move || {
-            let mut rng = crate::test_helpers::test_rng();
+            let mut rng = std::test_helpers::test_rng();
             for _ in 0..M {
                 if rng.gen_bool(1.0 / (N as f64)) {
                     drop(r.write().unwrap());
@@ -43,8 +41,7 @@ fn frob() {
     let _ = rx.recv();
 }
 
-#[test]
-fn test_rw_arc_poison_wr() {
+pub fn test_rw_arc_poison_wr() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
     let _: Result<(), _> = thread::spawn(move || {
@@ -55,8 +52,7 @@ fn test_rw_arc_poison_wr() {
     assert!(arc.read().is_err());
 }
 
-#[test]
-fn test_rw_arc_poison_ww() {
+pub fn test_rw_arc_poison_ww() {
     let arc = Arc::new(RwLock::new(1));
     assert!(!arc.is_poisoned());
     let arc2 = arc.clone();
@@ -69,8 +65,7 @@ fn test_rw_arc_poison_ww() {
     assert!(arc.is_poisoned());
 }
 
-#[test]
-fn test_rw_arc_no_poison_rr() {
+pub fn test_rw_arc_no_poison_rr() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
     let _: Result<(), _> = thread::spawn(move || {
@@ -81,8 +76,7 @@ fn test_rw_arc_no_poison_rr() {
     let lock = arc.read().unwrap();
     assert_eq!(*lock, 1);
 }
-#[test]
-fn test_rw_arc_no_poison_rw() {
+pub fn test_rw_arc_no_poison_rw() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
     let _: Result<(), _> = thread::spawn(move || {
@@ -94,8 +88,7 @@ fn test_rw_arc_no_poison_rw() {
     assert_eq!(*lock, 1);
 }
 
-#[test]
-fn test_rw_arc() {
+pub fn test_rw_arc() {
     let arc = Arc::new(RwLock::new(0));
     let arc2 = arc.clone();
     let (tx, rx) = channel();
@@ -132,8 +125,7 @@ fn test_rw_arc() {
     assert_eq!(*lock, 10);
 }
 
-#[test]
-fn test_rw_arc_access_in_unwind() {
+pub fn test_rw_arc_access_in_unwind() {
     let arc = Arc::new(RwLock::new(1));
     let arc2 = arc.clone();
     let _ = thread::spawn(move || -> () {
@@ -154,8 +146,7 @@ fn test_rw_arc_access_in_unwind() {
     assert_eq!(*lock, 2);
 }
 
-#[test]
-fn test_rwlock_unsized() {
+pub fn test_rwlock_unsized() {
     let rw: &RwLock<[i32]> = &RwLock::new([1, 2, 3]);
     {
         let b = &mut *rw.write().unwrap();
@@ -166,8 +157,7 @@ fn test_rwlock_unsized() {
     assert_eq!(&*rw.read().unwrap(), comp);
 }
 
-#[test]
-fn test_rwlock_try_write() {
+pub fn test_rwlock_try_write() {
     let lock = RwLock::new(0isize);
     let read_guard = lock.read().unwrap();
 
@@ -181,14 +171,12 @@ fn test_rwlock_try_write() {
     drop(read_guard);
 }
 
-#[test]
-fn test_into_inner() {
+pub fn test_into_inner() {
     let m = RwLock::new(NonCopy(10));
     assert_eq!(m.into_inner().unwrap(), NonCopy(10));
 }
 
-#[test]
-fn test_into_inner_drop() {
+pub fn test_into_inner_drop() {
     struct Foo(Arc<AtomicUsize>);
     impl Drop for Foo {
         fn drop(&mut self) {
@@ -205,8 +193,7 @@ fn test_into_inner_drop() {
     assert_eq!(num_drops.load(Ordering::SeqCst), 1);
 }
 
-#[test]
-fn test_into_inner_poison() {
+pub fn test_into_inner_poison() {
     let m = Arc::new(RwLock::new(NonCopy(10)));
     let m2 = m.clone();
     let _ = thread::spawn(move || {
@@ -222,15 +209,13 @@ fn test_into_inner_poison() {
     }
 }
 
-#[test]
-fn test_get_mut() {
+pub fn test_get_mut() {
     let mut m = RwLock::new(NonCopy(10));
     *m.get_mut().unwrap() = NonCopy(20);
     assert_eq!(m.into_inner().unwrap(), NonCopy(20));
 }
 
-#[test]
-fn test_get_mut_poison() {
+pub fn test_get_mut_poison() {
     let m = Arc::new(RwLock::new(NonCopy(10)));
     let m2 = m.clone();
     let _ = thread::spawn(move || {
@@ -246,8 +231,7 @@ fn test_get_mut_poison() {
     }
 }
 
-#[test]
-fn test_read_guard_covariance() {
+pub fn test_read_guard_covariance() {
     fn do_stuff<'a>(_: RwLockReadGuard<'_, &'a i32>, _: &'a i32) {}
     let j: i32 = 5;
     let lock = RwLock::new(&j);

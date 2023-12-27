@@ -1,19 +1,16 @@
-use crate::sync::atomic::{AtomicBool, Ordering};
-use crate::sync::mpsc::channel;
-use crate::sync::{Arc, Condvar, Mutex};
-use crate::thread;
-use crate::time::Duration;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::channel;
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread;
+use std::time::Duration;
 
-#[test]
-fn smoke() {
+pub fn smoke() {
     let c = Condvar::new();
     c.notify_one();
     c.notify_all();
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn notify_one() {
+pub fn notify_one() {
     let m = Arc::new(Mutex::new(()));
     let m2 = m.clone();
     let c = Arc::new(Condvar::new());
@@ -28,9 +25,7 @@ fn notify_one() {
     drop(g);
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn notify_all() {
+pub fn notify_all() {
     const N: usize = 10;
 
     let data = Arc::new((Mutex::new(0), Condvar::new()));
@@ -65,9 +60,7 @@ fn notify_all() {
     }
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn wait_while() {
+pub fn wait_while() {
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
     let pair2 = pair.clone();
 
@@ -86,9 +79,7 @@ fn wait_while() {
     assert!(*guard.unwrap());
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn wait_timeout_wait() {
+pub fn wait_timeout_wait() {
     let m = Arc::new(Mutex::new(()));
     let c = Arc::new(Condvar::new());
 
@@ -105,9 +96,7 @@ fn wait_timeout_wait() {
     }
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn wait_timeout_while_wait() {
+pub fn wait_timeout_while_wait() {
     let m = Arc::new(Mutex::new(()));
     let c = Arc::new(Condvar::new());
 
@@ -117,9 +106,7 @@ fn wait_timeout_while_wait() {
     assert!(wait.timed_out());
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn wait_timeout_while_instant_satisfy() {
+pub fn wait_timeout_while_instant_satisfy() {
     let m = Arc::new(Mutex::new(()));
     let c = Arc::new(Condvar::new());
 
@@ -129,9 +116,7 @@ fn wait_timeout_while_instant_satisfy() {
     assert!(!wait.timed_out());
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn wait_timeout_while_wake() {
+pub fn wait_timeout_while_wake() {
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
     let pair_copy = pair.clone();
 
@@ -152,9 +137,7 @@ fn wait_timeout_while_wake() {
     assert!(*g2);
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn wait_timeout_wake() {
+pub fn wait_timeout_wake() {
     let m = Arc::new(Mutex::new(()));
     let c = Arc::new(Condvar::new());
 

@@ -1,4 +1,4 @@
-use crate::{
+use std::{
     panic,
     sync::OnceLock,
     sync::{
@@ -12,9 +12,7 @@ fn spawn_and_wait<R: Send + 'static>(f: impl FnOnce() -> R + Send + 'static) -> 
     thread::spawn(f).join().unwrap()
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn sync_once_cell() {
+pub fn sync_once_cell() {
     static ONCE_CELL: OnceLock<i32> = OnceLock::new();
 
     assert!(ONCE_CELL.get().is_none());
@@ -28,8 +26,7 @@ fn sync_once_cell() {
     assert_eq!(ONCE_CELL.get(), Some(&92));
 }
 
-#[test]
-fn sync_once_cell_get_mut() {
+pub fn sync_once_cell_get_mut() {
     let mut c = OnceLock::new();
     assert!(c.get_mut().is_none());
     c.set(90).unwrap();
@@ -37,18 +34,17 @@ fn sync_once_cell_get_mut() {
     assert_eq!(c.get_mut(), Some(&mut 92));
 }
 
-#[test]
-fn sync_once_cell_get_unchecked() {
+/*
+pub fn sync_once_cell_get_unchecked() {
     let c = OnceLock::new();
     c.set(92).unwrap();
     unsafe {
         assert_eq!(c.get_unchecked(), &92);
     }
 }
+*/
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn sync_once_cell_drop() {
+pub fn sync_once_cell_drop() {
     static DROP_CNT: AtomicUsize = AtomicUsize::new(0);
     struct Dropper;
     impl Drop for Dropper {
@@ -67,14 +63,12 @@ fn sync_once_cell_drop() {
     assert_eq!(DROP_CNT.load(SeqCst), 1);
 }
 
-#[test]
-fn sync_once_cell_drop_empty() {
+pub fn sync_once_cell_drop_empty() {
     let x = OnceLock::<String>::new();
     drop(x);
 }
 
-#[test]
-fn clone() {
+pub fn clone() {
     let s = OnceLock::new();
     let c = s.clone();
     assert!(c.get().is_none());
@@ -84,8 +78,8 @@ fn clone() {
     assert_eq!(c.get().map(String::as_str), Some("hello"));
 }
 
-#[test]
-fn get_or_try_init() {
+/*
+pub fn get_or_try_init() {
     let cell: OnceLock<String> = OnceLock::new();
     assert!(cell.get().is_none());
 
@@ -99,15 +93,14 @@ fn get_or_try_init() {
     assert_eq!(cell.get_or_try_init(|| Ok::<_, ()>("hello".to_string())), Ok(&"hello".to_string()));
     assert_eq!(cell.get(), Some(&"hello".to_string()));
 }
+*/
 
-#[test]
-fn from_impl() {
+pub fn from_impl() {
     assert_eq!(OnceLock::from("value").get(), Some(&"value"));
     assert_ne!(OnceLock::from("foo").get(), Some(&"bar"));
 }
 
-#[test]
-fn partialeq_impl() {
+pub fn partialeq_impl() {
     assert!(OnceLock::from("value") == OnceLock::from("value"));
     assert!(OnceLock::from("foo") != OnceLock::from("bar"));
 
@@ -115,8 +108,7 @@ fn partialeq_impl() {
     assert!(OnceLock::<String>::new() != OnceLock::from("value".to_owned()));
 }
 
-#[test]
-fn into_inner() {
+pub fn into_inner() {
     let cell: OnceLock<String> = OnceLock::new();
     assert_eq!(cell.into_inner(), None);
     let cell = OnceLock::new();
@@ -124,14 +116,12 @@ fn into_inner() {
     assert_eq!(cell.into_inner(), Some("hello".to_string()));
 }
 
-#[test]
-fn is_sync_send() {
+pub fn is_sync_send() {
     fn assert_traits<T: Send + Sync>() {}
     assert_traits::<OnceLock<String>>();
 }
 
-#[test]
-fn eval_once_macro() {
+pub fn eval_once_macro() {
     macro_rules! eval_once {
         (|| -> $ty:ty {
             $($body:tt)*
@@ -157,9 +147,7 @@ fn eval_once_macro() {
     assert_eq!(fib[5], 8)
 }
 
-#[test]
-#[cfg_attr(target_os = "emscripten", ignore)]
-fn sync_once_cell_does_not_leak_partially_constructed_boxes() {
+pub fn sync_once_cell_does_not_leak_partially_constructed_boxes() {
     static ONCE_CELL: OnceLock<String> = OnceLock::new();
 
     let n_readers = 10;
@@ -177,7 +165,7 @@ fn sync_once_cell_does_not_leak_partially_constructed_boxes() {
                     break;
                 }
                 #[cfg(target_env = "sgx")]
-                crate::thread::yield_now();
+                std::thread::yield_now();
             }
         });
     }
@@ -193,8 +181,7 @@ fn sync_once_cell_does_not_leak_partially_constructed_boxes() {
     }
 }
 
-#[test]
-fn dropck() {
+pub fn dropck() {
     let cell = OnceLock::new();
     {
         let s = String::new();

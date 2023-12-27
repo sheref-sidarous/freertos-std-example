@@ -1,10 +1,9 @@
-use super::{ReentrantMutex, ReentrantMutexGuard};
-use crate::cell::RefCell;
-use crate::sync::Arc;
-use crate::thread;
+use std::sync::{ReentrantMutex, ReentrantMutexGuard};
+use std::cell::RefCell;
+use std::sync::Arc;
+use std::thread;
 
-#[test]
-fn smoke() {
+pub fn smoke() {
     let m = ReentrantMutex::new(());
     {
         let a = m.lock();
@@ -20,8 +19,7 @@ fn smoke() {
     }
 }
 
-#[test]
-fn is_mutex() {
+pub fn is_mutex() {
     let m = Arc::new(ReentrantMutex::new(RefCell::new(0)));
     let m2 = m.clone();
     let lock = m.lock();
@@ -37,8 +35,7 @@ fn is_mutex() {
     child.join().unwrap();
 }
 
-#[test]
-fn trylock_works() {
+pub fn trylock_works() {
     let m = Arc::new(ReentrantMutex::new(()));
     let m2 = m.clone();
     let _lock = m.try_lock();
