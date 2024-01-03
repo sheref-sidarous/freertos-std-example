@@ -12,6 +12,7 @@ IMAGE := RTOSDemo.out
 CC = arm-none-eabi-gcc
 LD = arm-none-eabi-gcc
 SIZE = arm-none-eabi-size
+OBJDUMP=arm-none-eabi-objdump
 MAKE = make
 
 CFLAGS += $(INCLUDE_DIRS) -nostartfiles -ffreestanding -mthumb -mcpu=cortex-m3 \
@@ -117,6 +118,7 @@ $(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) Makefile rust-app-lib
 		-Wl,--no-merge-exidx-entries \
 		-specs=nosys.specs -specs=rdimon.specs -o $(OUTPUT_DIR)/$(IMAGE)
 	cat $(OUTPUT_DIR)/RTOSDemo_mangled.map | rustfilt > $(OUTPUT_DIR)/RTOSDemo.map
+#   $(OBJDUMP) -S $(OUTPUT_DIR)/$(IMAGE) | rustfilt > $(OUTPUT_DIR)/RTOSDemo.dsm
 	$(SIZE) $(OUTPUT_DIR)/$(IMAGE)
 
 $(DEP_OUTPUT):
