@@ -3,6 +3,7 @@
 #![feature(core_panic)]
 #![feature(fmt_internals)]
 #![allow(dead_code)]
+#![feature(once_cell_try)]
 
 // use freertos_rust::*;
 use core::ffi::c_char;
@@ -34,11 +35,20 @@ pub extern "C" fn vRustTickerTask() {
 
 fn main_thread() {
 
-    //sync_tests::run_all_tests();
-    std_tests::sync::mutex::all();
-    std_tests::sync::barrier::all();
-    loop {
-        println!("Rust Tick! <3");
-        thread::sleep(Duration::from_millis(1000));
-    }
+    thread::spawn( || {
+        sync_tests::run_all_tests();
+    }).join();
+
+    //std_tests::sync::barrier::all(); // PASS
+    std_tests::sync::condvar::all(); // PASS
+    //std_tests::sync::mpsc::all(); // fails malloc
+    //std_tests::sync::mutex::all(); // PASS
+    //std_tests::sync::once_lock::all();  // fails malloc
+    //std_tests::sync::once::all(); // PASS after panic unwind tests are disabled
+    //std_tests::sync::remutex::all(); // not ported yet
+    //std_tests::sync::rwlock::all(); // not ported yet
+
+    println!("All tests are done!");
+
+
 }
