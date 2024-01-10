@@ -53,6 +53,7 @@
 /* Standard includes. */
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* This project provides two demo applications.  A simple blinky style demo
 application, and a more comprehensive test and demo application.  The
@@ -94,6 +95,20 @@ void vFullDemoIdleFunction( void );
  */
 static void prvUARTInit( void );
 
+static void exit_via_semihosting(bool successful_exit) {
+	register int r0 asm("r0") = 0x18;
+	register int r1 asm("r1") = 0x20023; // 0x20023 stands for RunTimeErrorUnknown
+	if (successful_exit) {
+		r1 = 0x20026; // 0x20026 stands for ApplicationExit, this is successful exit
+	}
+	asm volatile("bkpt #0xAB" : "+r"(r0) : "r"(r1));
+
+	// should not get here while running in Qemu, but let's busy loop
+	//	in case this code ends up on some actual hardware
+	portDISABLE_INTERRUPTS();
+	for( ;; );
+}
+
 /*-----------------------------------------------------------*/
 
 void main( void )
@@ -133,9 +148,8 @@ void vApplicationMallocFailedHook( void )
 	(although it does not provide information on how the remaining heap might be
 	fragmented).  See http://www.freertos.org/a00111.html for more
 	information. */
-	printf( "\r\n\r\nMalloc failed\r\n" );
-	portDISABLE_INTERRUPTS();
-	for( ;; );
+	printf( "Malloc failed\n" );
+	exit_via_semihosting(false);
 }
 /*-----------------------------------------------------------*/
 
@@ -162,8 +176,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
 	printf( "\r\n\r\nStack overflow in %s\r\n", pcTaskName );
-	portDISABLE_INTERRUPTS();
-	for( ;; );
+exit_via_semihosting(false);
 }
 /*-----------------------------------------------------------*/
 
@@ -202,19 +215,7 @@ volatile uint32_t ulSetToNonZeroInDebuggerToContinue = 0;
 	http://www.freertos.org/a00110.html#configASSERT for more information. */
 
 	printf( "ASSERT! Line %d, file %s\r\n", ( int ) ulLine, pcFileName );
-
- 	taskENTER_CRITICAL();
-	{
-		/* You can step out of this function to debug the assertion by using
-		the debugger to set ulSetToNonZeroInDebuggerToContinue to a non-zero
-		value. */
-		while( ulSetToNonZeroInDebuggerToContinue == 0 )
-		{
-			__asm volatile( "NOP" );
-			__asm volatile( "NOP" );
-		}
-	}
-	taskEXIT_CRITICAL();
+	exit_via_semihosting(false);
 }
 /*-----------------------------------------------------------*/
 
@@ -306,4 +307,3 @@ void *malloc( size_t size )
 	for( ;; );
 
 }
-
