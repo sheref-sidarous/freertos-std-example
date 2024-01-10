@@ -76,19 +76,8 @@ required UART registers. */
 #define UART0_BAUDDIV	( * ( ( ( volatile uint32_t * )( UART0_ADDRESS + 16UL ) ) ) )
 #define TX_BUFFER_MASK	( 1UL )
 
-/*
- * main_blinky() is used when mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is set to 1.
- * main_full() is used when mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is set to 0.
- */
-extern void main_blinky( void );
-extern void main_full( void );
 
-/*
- * Only the comprehensive demo uses application hook (callback) functions.  See
- * https://www.FreeRTOS.org/a00016.html for more information.
- */
-void vFullDemoTickHookFunction( void );
-void vFullDemoIdleFunction( void );
+extern void vRustEntryFunction( void *pvParameters );
 
 /*
  * Printf() output is sent to the serial port.  Initialise the serial hardware.
@@ -119,17 +108,17 @@ void main( void )
 	/* Hardware initialisation.  printf() output uses the UART for IO. */
 	prvUARTInit();
 
-	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
-	of this file. */
-	#if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1 )
-	{
-		main_blinky();
-	}
-	#else
-	{
-		main_full();
-	}
-	#endif
+	vRustEntryFunction(NULL);
+
+	vTaskStartScheduler();
+
+	/* If all is well, the scheduler will now be running, and the following
+	line will never be reached.  If the following line does execute, then
+	there was insufficient FreeRTOS heap memory available for the idle and/or
+	timer tasks	to be created.  See the memory management section on the
+	FreeRTOS web site for more details.  NOTE: This demo uses static allocation
+	for the idle and timer tasks so this line should never execute. */
+	for( ;; );
 }
 /*-----------------------------------------------------------*/
 
@@ -175,8 +164,8 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 	/* Run time stack overflow checking is performed if
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
-	printf( "\r\n\r\nStack overflow in %s\r\n", pcTaskName );
-exit_via_semihosting(false);
+	printf( "Stack overflow in %s", pcTaskName );
+	exit_via_semihosting(false);
 }
 /*-----------------------------------------------------------*/
 
@@ -187,14 +176,6 @@ void vApplicationTickHook( void )
 	added here, but the tick hook is called from an interrupt context, so
 	code must not attempt to block, and only the interrupt safe FreeRTOS API
 	functions can be used (those that end in FromISR()). */
-
-	#if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY != 1 )
-	{
-		extern void vFullDemoTickHookFunction( void );
-
-		vFullDemoTickHookFunction();
-	}
-	#endif /* mainCREATE_SIMPLE_BLINKY_DEMO_ONLY */
 }
 /*-----------------------------------------------------------*/
 
@@ -209,8 +190,6 @@ void vApplicationDaemonTaskStartupHook( void )
 
 void vAssertCalled( const char *pcFileName, uint32_t ulLine )
 {
-volatile uint32_t ulSetToNonZeroInDebuggerToContinue = 0;
-
 	/* Called if an assertion passed to configASSERT() fails.  See
 	http://www.freertos.org/a00110.html#configASSERT for more information. */
 
@@ -302,8 +281,7 @@ void *malloc( size_t size )
 	/* This project uses heap_4 so doesn't set up a heap for use by the C
 	library - but something is calling the C library malloc().  See
 	https://freertos.org/a00111.html for more information. */
-	printf( "\r\n\r\nUnexpected call to malloc() - should be usine pvPortMalloc()\r\n" );
-	portDISABLE_INTERRUPTS();
-	for( ;; );
+	printf( "Unexpected call to malloc() - should be using pvPortMalloc()\n" );
+	exit_via_semihosting(false);
 
 }

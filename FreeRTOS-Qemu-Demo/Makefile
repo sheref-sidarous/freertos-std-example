@@ -79,8 +79,6 @@ DEMO_PROJECT = .
 VPATH += $(DEMO_PROJECT)
 INCLUDE_DIRS += -I$(DEMO_PROJECT) -I$(DEMO_PROJECT)/CMSIS
 SOURCE_FILES += $(DEMO_PROJECT)/main.c
-SOURCE_FILES += $(DEMO_PROJECT)/main_blinky.c
-SOURCE_FILES += $(DEMO_PROJECT)/main_full.c
 SOURCE_FILES += ./startup_gcc.c
 SOURCE_FILES += ./printf-stdarg.c
 

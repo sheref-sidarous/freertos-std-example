@@ -17,7 +17,7 @@ mod test_function;
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub extern "C" fn vRustTickerTask() {
+pub extern "C" fn vRustEntryFunction() {
 
     thread::spawn(|| {
         test_function::FUNCTION();

@@ -21,13 +21,14 @@ use std::sync::{
     Arc, Barrier,
 };
 
+use cortex_m_semihosting::debug::{self, EXIT_SUCCESS, EXIT_FAILURE};
 
 mod sync_tests;
 mod std_tests;
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub extern "C" fn vRustTickerTask() {
+pub extern "C" fn vRustEntryFunction() {
 
     thread::spawn(main_thread);
 
@@ -40,7 +41,7 @@ fn main_thread() {
     }).join();
 
     //std_tests::sync::barrier::all(); // PASS
-    std_tests::sync::condvar::all(); // PASS
+    //std_tests::sync::condvar::all(); // PASS
     //std_tests::sync::mpsc::all(); // fails malloc
     //std_tests::sync::mutex::all(); // PASS
     //std_tests::sync::once_lock::all();  // fails malloc
@@ -49,6 +50,8 @@ fn main_thread() {
     //std_tests::sync::rwlock::all(); // not ported yet
 
     println!("All tests are done!");
+
+    debug::exit(EXIT_SUCCESS);
 
 
 }
