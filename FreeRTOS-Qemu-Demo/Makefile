@@ -1,8 +1,8 @@
 
 # Paths to other componenets
-KERNEL_DIR = ./../FreeRTOS-Kernel
-RUST_APP_ROOT = ./../rust-app
-RUST_STD_ROOT = ./../freertos-std
+KERNEL_DIR ?= ./../FreeRTOS-Kernel
+RUST_APP_ROOT ?= ./../rust-app
+RUST_STD_ROOT ?= ./../freertos-std
 
 # Build output
 OUTPUT_DIR := ./output
