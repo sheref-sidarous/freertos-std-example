@@ -34,7 +34,7 @@ pub fn sync_once_cell_get_mut() {
     assert_eq!(c.get_mut(), Some(&mut 92));
 }
 
-/*
+/* Relies on interal API
 pub fn sync_once_cell_get_unchecked() {
     let c = OnceLock::new();
     c.set(92).unwrap();
@@ -78,7 +78,7 @@ pub fn clone() {
     assert_eq!(c.get().map(String::as_str), Some("hello"));
 }
 
-/*
+/* Relies on interal API
 pub fn get_or_try_init() {
     let cell: OnceLock<String> = OnceLock::new();
     assert!(cell.get().is_none());
@@ -150,8 +150,8 @@ pub fn eval_once_macro() {
 pub fn sync_once_cell_does_not_leak_partially_constructed_boxes() {
     static ONCE_CELL: OnceLock<String> = OnceLock::new();
 
-    let n_readers = 10;
-    let n_writers = 3;
+    let n_readers = 5;
+    let n_writers = 5;
     const MSG: &str = "Hello, World";
 
     let (tx, rx) = channel();

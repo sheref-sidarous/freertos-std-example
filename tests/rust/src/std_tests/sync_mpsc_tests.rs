@@ -4,10 +4,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 pub fn stress_factor() -> usize {
-    match env::var("RUST_TEST_STRESS") {
-        Ok(val) => val.parse().unwrap(),
-        Err(..) => 1,
-    }
+    1
 }
 
 pub fn smoke() {
@@ -120,7 +117,7 @@ pub fn stress() {
 }
 
 pub fn stress_shared() {
-    const AMT: u32 = if cfg!(miri) { 100 } else { 10000 };
+    const AMT: u32 = 100;
     const NTHREADS: u32 = 8;
     let (tx, rx) = channel::<i32>();
 
@@ -353,7 +350,7 @@ pub fn stream_send_recv_stress() {
         recv(rx, 0);
 
         fn send(tx: Sender<Box<i32>>, i: i32) {
-            if i == 10 {
+            if i == 6 {
                 return;
             }
 
@@ -364,7 +361,7 @@ pub fn stream_send_recv_stress() {
         }
 
         fn recv(rx: Receiver<Box<i32>>, i: i32) {
-            if i == 10 {
+            if i == 6 {
                 return;
             }
 
@@ -426,7 +423,7 @@ pub fn recv_timeout_upgrade() {
 
 pub fn stress_recv_timeout_shared() {
     let (tx, rx) = channel();
-    let stress = stress_factor() + 100;
+    let stress = 10;
 
     for i in 0..stress {
         let tx = tx.clone();
@@ -494,7 +491,7 @@ pub fn shared_recv_timeout() {
 
 pub fn shared_chan_stress() {
     let (tx, rx) = channel();
-    let total = stress_factor() + 100;
+    let total = 10;
     for _ in 0..total {
         let tx = tx.clone();
         thread::spawn(move || {

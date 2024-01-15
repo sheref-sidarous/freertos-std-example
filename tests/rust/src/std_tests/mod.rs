@@ -13,7 +13,7 @@ mod sync_once_tests;
 pub mod sync {
 
     pub mod barrier {
-        use crate::std_tests::sync_barrier_tests::*;
+        pub use crate::std_tests::sync_barrier_tests::*;
 
         pub fn all() {
             test_barrier();
@@ -36,7 +36,7 @@ pub mod sync {
         }
     }
     pub mod mpsc {
-        use crate::std_tests::sync_mpsc_tests::*;
+        pub use crate::std_tests::sync_mpsc_tests::*;
         pub fn all() {
             smoke();
             drop_full();
@@ -98,7 +98,7 @@ pub mod sync {
         }
     }
     pub mod mutex {
-        use crate::std_tests::sync_mutex_tests::*;
+        pub use crate::std_tests::sync_mutex_tests::*;
 
         pub fn all() {
             smoke();
@@ -119,7 +119,7 @@ pub mod sync {
     }
 
     pub mod once_lock {
-        use crate::std_tests::sync_once_lock_tests::*;
+        pub use crate::std_tests::sync_once_lock_tests::*;
 
         pub fn all() {
                 sync_once_cell();
@@ -139,7 +139,7 @@ pub mod sync {
         }
     }
     pub mod once {
-        use crate::std_tests::sync_once_tests::*;
+        pub use crate::std_tests::sync_once_tests::*;
 
         pub fn all() {
             smoke_once();
@@ -149,16 +149,13 @@ pub mod sync {
         }
     }
 
-/*
+    /*
     pub mod remutex {
-        use crate::std_tests::sync_remutex_tests::*;
-
-
+        pub use crate::std_tests::sync_remutex_tests::*;
     }
 
     pub mod rwlock {
-        use crate::std_tests::sync_rwlock_tests::*;
-
+        pub use crate::std_tests::sync_rwlock_tests::*;
     }
-*/
+    */
 }

@@ -8,7 +8,7 @@ use std::sync::{self, Arc, RwLock, Condvar, mpsc};
 
 
 // Test join : that a parent thread will block until the child thread is terminanted with a value, and the value is correct
-fn test_join() {
+pub fn test_join() {
     let x = 2;
     let thread_handle = thread::spawn(move || {
         x * 2
@@ -18,7 +18,7 @@ fn test_join() {
 }
 
 // Test thread sleep
-fn test_sleep() {
+pub fn test_sleep() {
     let before = time::Instant::now();
     let duration = time::Duration::from_millis(100);
     thread::sleep(duration);
@@ -29,7 +29,7 @@ fn test_sleep() {
 // TODO: Test thread yield
 
 // Test thread local storage
-fn test_thread_local_storage() {
+pub fn test_thread_local_storage() {
     // Taken from std LocalKey documentation
     thread_local!(static FOO: RefCell<u32> = RefCell::new(1));
 
@@ -56,7 +56,7 @@ fn test_thread_local_storage() {
 }
 
 // Mutex
-fn test_mutex() {
+pub fn test_mutex() {
 
     let counter = Arc::new(Mutex::new(0)); // Wrap the counter in an Arc and Mutex
 
@@ -87,7 +87,7 @@ fn test_mutex() {
 }
 
 // Test Once
-fn test_once () {
+pub fn test_once () {
 
     static mut UNPROTECED_SHARED_VAR : i32 = 0;
     static INCREMENT_ONCE : sync::Once = sync::Once::new();
@@ -118,7 +118,7 @@ fn test_once () {
 // TODO: a test Once where one of the functions panics
 
 // Read / Write Locks
-fn test_rw_lock_1() {
+pub fn test_rw_lock_1() {
 
     let data = Arc::new(RwLock::new(10)); // Wrap the data in an Arc and RwLock
 
@@ -164,7 +164,7 @@ fn test_rw_lock_1() {
 
 }
 
-fn test_rw_lock_2() {
+pub fn test_rw_lock_2() {
 
     let data = Arc::new(RwLock::new(10)); // Wrap the data in an Arc and RwLock
 
@@ -197,7 +197,7 @@ fn test_rw_lock_2() {
 
 
 // Conditional variables
-fn test_condvar() {
+pub fn test_condvar() {
     // Create shared data between threads
     let data = Arc::new(Mutex::new(false));
     let condvar = Arc::new(Condvar::new());
@@ -235,7 +235,7 @@ fn test_condvar() {
 }
 
 // send/recv
-fn test_mpsc() {
+pub fn test_mpsc() {
     // Create a channel for communication
     let (sender, receiver) = mpsc::channel();
 
