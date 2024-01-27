@@ -1,7 +1,5 @@
 #![feature(restricted_std)]
 #![allow(unused_imports)]
-#![feature(core_panic)]
-#![feature(fmt_internals)]
 #![allow(dead_code)]
 #![feature(once_cell_try)]
 
