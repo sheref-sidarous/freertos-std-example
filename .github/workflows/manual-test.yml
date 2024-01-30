@@ -20,7 +20,8 @@ jobs:
         sudo apt update
         sudo apt install curl qemu-system-arm python3-pytest -y
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
-        sudo /root/.cargo/bin/rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
+        echo "Installing Rust"
+        sudo $HOME/.cargo/bin/rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
 
     - name: Run tests
       working-directory: tests
