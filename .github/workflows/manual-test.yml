@@ -28,6 +28,12 @@ jobs:
         rustup target add thumbv7m-none-eabi
         cargo install rustfilt
 
+    - name: checkout submodules
+      run:  |
+        set -e
+        git submodule init
+        git submodule update
+
     - name: Run tests
       working-directory: tests
       run: pytest-3 test.py
