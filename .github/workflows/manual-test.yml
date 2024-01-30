@@ -10,6 +10,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    container:
+      image: ubuntu:latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -17,11 +20,11 @@ jobs:
     - name: Install dependencies
       run:  |
         set -e
-        sudo apt update
-        sudo apt install curl qemu-system-arm python3-pytest -y
+        apt update
+        apt install curl qemu-system-arm python3-pytest -y
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
         echo "Installing Rust"
-        sudo $HOME/.cargo/bin/rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
+        root/.cargo/bin/rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
 
     - name: Run tests
       working-directory: tests
