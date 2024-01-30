@@ -32,4 +32,4 @@ jobs:
 
     - name: Run tests
       working-directory: tests
-      run: pytest-3 test.py
+      run: PATH=$PATH:$HOME/.cargo/bin/ pytest-3 test.py
