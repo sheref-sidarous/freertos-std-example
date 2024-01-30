@@ -23,9 +23,9 @@ jobs:
         apt update
         apt install curl qemu-system-arm python3-pytest make gcc gcc-arm-none-eabi -y
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
-        $HOME/.cargo/bin/rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
-        $HOME/.cargo/bin/rustup target add thumbv7m-none-eabi
-        bash
+        export PATH=$PATH:$HOME/.cargo/bin/
+        rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
+        rustup target add thumbv7m-none-eabi
         cargo install rustfilt
 
     - name: Run tests
