@@ -1,6 +1,7 @@
 name: Nightly Tests
 
 on:
+  workflow_dispatch:  # This event allows manual triggering
   schedule:
     - cron: '0 0 * * *'  # This cron schedule runs every night at midnight UTC
 
