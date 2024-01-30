@@ -16,23 +16,18 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      submodules: recursive
 
     - name: Install dependencies
       run:  |
         set -e
         apt update
-        apt install curl qemu-system-arm python3-pytest make gcc gcc-arm-none-eabi git -y
+        apt install curl qemu-system-arm python3-pytest make gcc gcc-arm-none-eabi -y
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
         export PATH=$PATH:$HOME/.cargo/bin/
         rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
         rustup target add thumbv7m-none-eabi
         cargo install rustfilt
-
-    - name: checkout submodules
-      run:  |
-        set -e
-        git submodule init
-        git submodule update
 
     - name: Run tests
       working-directory: tests
