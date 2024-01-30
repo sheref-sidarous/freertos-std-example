@@ -1,7 +1,6 @@
 name: Nightly Tests
 
 on:
-  workflow_dispatch:  # This event allows manual triggering
   schedule:
     - cron: '0 0 * * *'  # This cron schedule runs every night at midnight UTC
 
@@ -9,18 +8,26 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    container:
+      image: ubuntu:latest
 
+    steps:
     - name: Install dependencies
       run:  |
         set -e
-        sudo apt update
-        sudo apt install curl qemu-system-arm python3-pytest -y
+        apt update
+        apt install curl qemu-system-arm python3-pytest make gcc gcc-arm-none-eabi git -y
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
+        export PATH=$PATH:$HOME/.cargo/bin/
         rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
+        rustup target add thumbv7m-none-eabi
+        cargo install rustfilt
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: 'true'
 
     - name: Run tests
       working-directory: tests
-      run: pytest tests.py
+      run: PATH=$PATH:$HOME/.cargo/bin/ pytest-3 test.py
