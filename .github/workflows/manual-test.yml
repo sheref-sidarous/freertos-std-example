@@ -21,10 +21,12 @@ jobs:
       run:  |
         set -e
         apt update
-        apt install curl qemu-system-arm python3-pytest -y
+        apt install curl qemu-system-arm python3-pytest make gcc gcc-arm-none-eabi -y
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
-        echo "Installing Rust"
         $HOME/.cargo/bin/rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
+        $HOME/.cargo/bin/rustup target add thumbv7m-none-eabi
+        bash
+        cargo install rustfilt
 
     - name: Run tests
       working-directory: tests
