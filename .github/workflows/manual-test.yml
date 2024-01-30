@@ -2,6 +2,9 @@ name: Manual Tests
 
 on:
   workflow_dispatch:  # This event allows manual triggering
+  push:
+    branches:
+      - testing
 
 jobs:
   test:
