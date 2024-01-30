@@ -1,0 +1,24 @@
+name: Manual Tests
+
+on:
+  workflow_dispatch:  # This event allows manual triggering
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run:  |
+        set -e
+        sudo apt update
+        sudo apt install curl qemu-system-arm python3-pytest -y
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
+        /root/.cargo/bin/rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
+
+    - name: Run tests
+      working-directory: tests
+      run: pytest tests.py
