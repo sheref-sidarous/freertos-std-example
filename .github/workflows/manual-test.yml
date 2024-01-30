@@ -21,7 +21,7 @@ jobs:
       run:  |
         set -e
         apt update
-        apt install curl qemu-system-arm python3-pytest make gcc gcc-arm-none-eabi -y
+        apt install curl qemu-system-arm python3-pytest make gcc gcc-arm-none-eabi git -y
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y
         export PATH=$PATH:$HOME/.cargo/bin/
         rustup toolchain install nightly --allow-downgrade --profile minimal --component clippy
