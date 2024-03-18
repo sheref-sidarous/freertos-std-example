@@ -1,22 +1,21 @@
-use super::Builder;
-use crate::any::Any;
-use crate::mem;
-use crate::panic::panic_any;
-use crate::result;
-use crate::sync::{
+use std::thread::Builder;
+use std::any::Any;
+use std::mem;
+use std::panic::panic_any;
+use std::result;
+use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc::{channel, Sender},
     Arc, Barrier,
 };
-use crate::thread::{self, Scope, ThreadId};
-use crate::time::Duration;
-use crate::time::Instant;
+use std::thread::{self, Scope, ThreadId};
+use std::time::Duration;
+use std::time::Instant;
 
 // !!! These tests are dangerous. If something is buggy, they will hang, !!!
 // !!! instead of exiting cleanly. This might wedge the buildbots.       !!!
 
-#[test]
-fn test_unnamed_thread() {
+pub fn test_unnamed_thread() {
     thread::spawn(move || {
         assert!(thread::current().name().is_none());
     })
@@ -25,8 +24,7 @@ fn test_unnamed_thread() {
     .expect("thread panicked");
 }
 
-#[test]
-fn test_named_thread() {
+pub fn test_named_thread() {
     Builder::new()
         .name("ada lovelace".to_string())
         .spawn(move || {
@@ -45,12 +43,11 @@ fn test_named_thread() {
     target_os = "tvos",
     target_os = "watchos"
 ))]
-#[test]
-fn test_named_thread_truncation() {
-    use crate::ffi::CStr;
+pub fn test_named_thread_truncation() {
+    use std::ffi::CStr;
 
-    let long_name = crate::iter::once("test_named_thread_truncation")
-        .chain(crate::iter::repeat(" yada").take(100))
+    let long_name = std::iter::once("test_named_thread_truncation")
+        .chain(std::iter::repeat(" yada").take(100))
         .collect::<String>();
 
     let result = Builder::new().name(long_name.clone()).spawn(move || {
@@ -69,14 +66,12 @@ fn test_named_thread_truncation() {
     result.unwrap().join().unwrap();
 }
 
-#[test]
 #[should_panic]
-fn test_invalid_named_thread() {
+pub fn test_invalid_named_thread() {
     let _ = Builder::new().name("ada l\0velace".to_string()).spawn(|| {});
 }
 
-#[test]
-fn test_run_basic() {
+pub fn test_run_basic() {
     let (tx, rx) = channel();
     thread::spawn(move || {
         tx.send(()).unwrap();
@@ -84,8 +79,7 @@ fn test_run_basic() {
     rx.recv().unwrap();
 }
 
-#[test]
-fn test_is_finished() {
+pub fn test_is_finished() {
     let b = Arc::new(Barrier::new(2));
     let t = thread::spawn({
         let b = b.clone();
@@ -114,16 +108,14 @@ fn test_is_finished() {
     assert!(join_time.elapsed() < Duration::from_secs(2));
 }
 
-#[test]
-fn test_join_panic() {
+pub fn test_join_panic() {
     match thread::spawn(move || panic!()).join() {
         result::Result::Err(_) => (),
         result::Result::Ok(()) => panic!(),
     }
 }
 
-#[test]
-fn test_spawn_sched() {
+pub fn test_spawn_sched() {
     let (tx, rx) = channel();
 
     fn f(i: i32, tx: Sender<()>) {
@@ -140,8 +132,7 @@ fn test_spawn_sched() {
     rx.recv().unwrap();
 }
 
-#[test]
-fn test_spawn_sched_childs_on_default_sched() {
+pub fn test_spawn_sched_childs_on_default_sched() {
     let (tx, rx) = channel();
 
     thread::spawn(move || {
@@ -171,15 +162,13 @@ where
     assert_eq!(x_in_parent, x_in_child);
 }
 
-#[test]
-fn test_avoid_copying_the_body_spawn() {
+pub fn test_avoid_copying_the_body_spawn() {
     avoid_copying_the_body(|v| {
         thread::spawn(move || v());
     });
 }
 
-#[test]
-fn test_avoid_copying_the_body_thread_spawn() {
+pub fn test_avoid_copying_the_body_thread_spawn() {
     avoid_copying_the_body(|f| {
         thread::spawn(move || {
             f();
@@ -187,20 +176,15 @@ fn test_avoid_copying_the_body_thread_spawn() {
     })
 }
 
-#[test]
-fn test_avoid_copying_the_body_join() {
+pub fn test_avoid_copying_the_body_join() {
     avoid_copying_the_body(|f| {
         let _ = thread::spawn(move || f()).join();
     })
 }
 
-#[test]
-fn test_child_doesnt_ref_parent() {
-    // If the child refcounts the parent thread, this will stack overflow when
-    // climbing the thread tree to dereference each ancestor. (See #1789)
-    // (well, it would if the constant were 8000+ - I lowered it to be more
-    // valgrind-friendly. try this at home, instead..!)
-    const GENERATIONS: u32 = 16;
+pub fn test_child_doesnt_ref_parent() {
+    // Reduced to 4 for FreeRTOS
+    const GENERATIONS: u32 = 4;
     fn child_no(x: u32) -> Box<dyn Fn() + Send> {
         return Box::new(move || {
             if x < GENERATIONS {
@@ -211,13 +195,11 @@ fn test_child_doesnt_ref_parent() {
     thread::spawn(|| child_no(0)());
 }
 
-#[test]
-fn test_simple_newsched_spawn() {
+pub fn test_simple_newsched_spawn() {
     thread::spawn(move || {});
 }
 
-#[test]
-fn test_try_panic_message_string_literal() {
+pub fn test_try_panic_message_string_literal() {
     match thread::spawn(move || {
         panic!("static string");
     })
@@ -232,8 +214,7 @@ fn test_try_panic_message_string_literal() {
     }
 }
 
-#[test]
-fn test_try_panic_any_message_owned_str() {
+pub fn test_try_panic_any_message_owned_str() {
     match thread::spawn(move || {
         panic_any("owned string".to_string());
     })
@@ -248,8 +229,7 @@ fn test_try_panic_any_message_owned_str() {
     }
 }
 
-#[test]
-fn test_try_panic_any_message_any() {
+pub fn test_try_panic_any_message_any() {
     match thread::spawn(move || {
         panic_any(Box::new(413u16) as Box<dyn Any + Send>);
     })
@@ -266,8 +246,7 @@ fn test_try_panic_any_message_any() {
     }
 }
 
-#[test]
-fn test_try_panic_any_message_unit_struct() {
+pub fn test_try_panic_any_message_unit_struct() {
     struct Juju;
 
     match thread::spawn(move || panic_any(Juju)).join() {
@@ -276,21 +255,19 @@ fn test_try_panic_any_message_unit_struct() {
     }
 }
 
-#[test]
-fn test_park_unpark_before() {
+pub fn test_park_unpark_before() {
     for _ in 0..10 {
         thread::current().unpark();
         thread::park();
     }
 }
 
-#[test]
-fn test_park_unpark_called_other_thread() {
+pub fn test_park_unpark_called_other_thread() {
     for _ in 0..10 {
         let th = thread::current();
 
         let _guard = thread::spawn(move || {
-            super::sleep(Duration::from_millis(50));
+            std::thread::sleep(Duration::from_millis(50));
             th.unpark();
         });
 
@@ -298,28 +275,25 @@ fn test_park_unpark_called_other_thread() {
     }
 }
 
-#[test]
-fn test_park_timeout_unpark_before() {
+pub fn test_park_timeout_unpark_before() {
     for _ in 0..10 {
         thread::current().unpark();
         thread::park_timeout(Duration::from_millis(u32::MAX as u64));
     }
 }
 
-#[test]
-fn test_park_timeout_unpark_not_called() {
+pub fn test_park_timeout_unpark_not_called() {
     for _ in 0..10 {
         thread::park_timeout(Duration::from_millis(10));
     }
 }
 
-#[test]
-fn test_park_timeout_unpark_called_other_thread() {
+pub fn test_park_timeout_unpark_called_other_thread() {
     for _ in 0..10 {
         let th = thread::current();
 
         let _guard = thread::spawn(move || {
-            super::sleep(Duration::from_millis(50));
+            std::thread::sleep(Duration::from_millis(50));
             th.unpark();
         });
 
@@ -327,29 +301,24 @@ fn test_park_timeout_unpark_called_other_thread() {
     }
 }
 
-#[test]
-fn sleep_ms_smoke() {
+pub fn sleep_ms_smoke() {
     thread::sleep(Duration::from_millis(2));
 }
 
-#[test]
-fn test_size_of_option_thread_id() {
+pub fn test_size_of_option_thread_id() {
     assert_eq!(mem::size_of::<Option<ThreadId>>(), mem::size_of::<ThreadId>());
 }
 
-#[test]
-fn test_thread_id_equal() {
+pub fn test_thread_id_equal() {
     assert!(thread::current().id() == thread::current().id());
 }
 
-#[test]
-fn test_thread_id_not_equal() {
+pub fn test_thread_id_not_equal() {
     let spawned_id = thread::spawn(|| thread::current().id()).join().unwrap();
     assert!(thread::current().id() != spawned_id);
 }
 
-#[test]
-fn test_scoped_threads_drop_result_before_join() {
+pub fn test_scoped_threads_drop_result_before_join() {
     let actually_finished = &AtomicBool::new(false);
     struct X<'scope, 'env>(&'scope Scope<'scope, 'env>, &'env AtomicBool);
     impl Drop for X<'_, '_> {
@@ -371,8 +340,7 @@ fn test_scoped_threads_drop_result_before_join() {
     assert!(actually_finished.load(Ordering::Relaxed));
 }
 
-#[test]
-fn test_scoped_threads_nll() {
+pub fn test_scoped_threads_nll() {
     // this is mostly a *compilation test* for this exact function:
     fn foo(x: &u8) {
         thread::scope(|s| {
@@ -387,9 +355,8 @@ fn test_scoped_threads_nll() {
 }
 
 // Regression test for https://github.com/rust-lang/rust/issues/98498.
-#[test]
 #[cfg(miri)] // relies on Miri's data race detector
-fn scope_join_race() {
+pub fn scope_join_race() {
     for _ in 0..100 {
         let a_bool = AtomicBool::new(false);
 

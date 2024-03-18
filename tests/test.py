@@ -144,6 +144,39 @@ rwlock_tests = prepend_mod_path("std_tests::sync::rwlock", [
     "test_read_guard_covariance",
 ])
 
+thread_tests = prepend_mod_path( "std_tests::thread", [
+    "test_unnamed_thread",
+    "test_named_thread",
+    #"test_named_thread_truncation",
+    #"test_invalid_named_thread", [should_panic] is not supported yet
+    "test_run_basic",
+    "test_is_finished",
+    #"test_join_panic", Needs panic unwind support
+    "test_spawn_sched",
+    "test_spawn_sched_childs_on_default_sched",
+    "test_avoid_copying_the_body_spawn",
+    "test_avoid_copying_the_body_thread_spawn",
+    "test_avoid_copying_the_body_join",
+    "test_child_doesnt_ref_parent",
+    "test_simple_newsched_spawn",
+    #"test_try_panic_message_string_literal", Needs panic unwind support
+    #"test_try_panic_any_message_owned_str", Needs panic unwind support
+    #"test_try_panic_any_message_any", Needs panic unwind support
+    #"test_try_panic_any_message_unit_struct", Needs panic unwind support
+    "test_park_unpark_before",
+    "test_park_unpark_called_other_thread",
+    "test_park_timeout_unpark_before",
+    "test_park_timeout_unpark_not_called",
+    "test_park_timeout_unpark_called_other_thread",
+    "sleep_ms_smoke",
+    "test_size_of_option_thread_id",
+    "test_thread_id_equal",
+    "test_thread_id_not_equal",
+    "test_scoped_threads_drop_result_before_join",
+    "test_scoped_threads_nll",
+    # "scope_join_race", miri specific
+])
+
 extra_sync_tests = prepend_mod_path("sync_tests", [
     "test_join",
     "test_sleep",
@@ -157,7 +190,7 @@ extra_sync_tests = prepend_mod_path("sync_tests", [
     "run_all_tests",
 ])
 
-all_tests = barrier_tests + condvar_tests + mpsc_tests + mutex_tests + once_lock_tests + extra_sync_tests #+ remutex_tests + rwlock_tests
+all_tests = barrier_tests + condvar_tests + mpsc_tests + mutex_tests + once_lock_tests + extra_sync_tests + thread_tests #+ remutex_tests + rwlock_tests
 
 @pytest.mark.parametrize("test_function", all_tests)
 def test_function(test_function):
