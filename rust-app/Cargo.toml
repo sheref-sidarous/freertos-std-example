@@ -10,4 +10,4 @@ name = "rust_app"
 crate-type = ["staticlib"] # Creates static lib
 
 [dependencies]
-std = {path = "../freertos-std", features = ["semihosted-stdio"], package = "freertos-std"}
+std = {path = "../freertos-std", features = ["semihosted-stdio", "panic-unwind"], package = "freertos-std"}

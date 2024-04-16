@@ -122,11 +122,12 @@ $(DEP_OUTPUT):
 include $(wildcard $(DEP_OUTPUT))
 
 clean:
-	rm -f $(OUTPUT_DIR)/*
+	rm -rf $(OUTPUT_DIR)/*
 
 
 rust-app-lib:
 	rm -f rustapp.a
+	#cargo +nightly-2024-02-04 build --manifest-path=$(RUST_APP_ROOT)/Cargo.toml --target=thumbv7m-none-eabi
 	cargo +stage1 build --manifest-path=$(RUST_APP_ROOT)/Cargo.toml --target=thumbv7m-none-eabi
 	cp $(RUST_APP_ROOT)/target/thumbv7m-none-eabi/debug/librust_app.a $(OUTPUT_DIR)/librust_app.a
 
