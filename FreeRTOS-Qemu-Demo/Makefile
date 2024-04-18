@@ -116,7 +116,6 @@ $(OUTPUT_DIR)/$(IMAGE): ./mps2_m3.ld $(OBJS_OUTPUT) Makefile rust-app-lib
 		-L$(OUTPUT_DIR) -lrust_app \
 		-Xlinker --gc-sections -Xlinker -T ./mps2_m3.ld \
 		-Xlinker -Map=$(OUTPUT_DIR)/RTOSDemo_mangled.map -specs=nano.specs \
-		-Wl,--no-merge-exidx-entries \
 		-specs=nosys.specs -specs=rdimon.specs -o $(OUTPUT_DIR)/$(IMAGE)
 	cat $(OUTPUT_DIR)/RTOSDemo_mangled.map | rustfilt > $(OUTPUT_DIR)/RTOSDemo.map
 #   $(OBJDUMP) -S $(OUTPUT_DIR)/$(IMAGE) | rustfilt > $(OUTPUT_DIR)/RTOSDemo.dsm
@@ -126,7 +125,7 @@ $(DEP_OUTPUT):
 include $(wildcard $(DEP_OUTPUT))
 
 clean:
-	rm -f $(OUTPUT_DIR)/*
+	rm -rf $(OUTPUT_DIR)/*
 
 
 rust-app-lib:
