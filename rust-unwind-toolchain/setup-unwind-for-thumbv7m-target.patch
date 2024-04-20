@@ -1,0 +1,20 @@
+diff --git a/compiler/rustc_target/src/spec/targets/thumbv7m_none_eabi.rs b/compiler/rustc_target/src/spec/targets/thumbv7m_none_eabi.rs
+index f9ab3ce1..d6d64081 100644
+--- a/compiler/rustc_target/src/spec/targets/thumbv7m_none_eabi.rs
++++ b/compiler/rustc_target/src/spec/targets/thumbv7m_none_eabi.rs
+@@ -1,6 +1,6 @@
+ // Targets the Cortex-M3 processor (ARMv7-M)
+
+-use crate::spec::{base, Target, TargetOptions};
++use crate::spec::{base, Target, TargetOptions, PanicStrategy};
+
+ pub fn target() -> Target {
+     Target {
+@@ -12,6 +12,7 @@ pub fn target() -> Target {
+         options: TargetOptions {
+             abi: "eabi".into(),
+             max_atomic_width: Some(32),
++            panic_strategy: PanicStrategy::Unwind,
+             ..base::thumb::opts()
+         },
+     }
