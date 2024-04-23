@@ -1,7 +1,5 @@
 #![feature(restricted_std)]
 #![allow(unused_imports)]
-#![feature(fmt_internals)]
-#![feature(is_some_and)]
 
 // use freertos_rust::*;
 use core::ffi::c_char;
