@@ -1,16 +1,12 @@
-#![feature(restricted_std)]
 #![allow(unused_imports)]
 #![allow(dead_code)]
 #![feature(once_cell_try)]
 
 use std::thread;
-
-
 use cortex_m_semihosting::debug::{self, EXIT_SUCCESS, EXIT_FAILURE};
 
 mod sync_tests;
 mod std_tests;
-
 mod test_function;
 
 #[allow(non_snake_case)]

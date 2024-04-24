@@ -43,7 +43,6 @@ mpsc_tests = [
     "std_tests::sync::mpsc::oneshot_single_thread_close_port_first",
     "std_tests::sync::mpsc::oneshot_single_thread_close_chan_first",
     "std_tests::sync::mpsc::oneshot_single_thread_send_port_close",
-    # "std_tests::sync::mpsc::oneshot_single_thread_recv_chan_close", needs panic unwind
     "std_tests::sync::mpsc::oneshot_single_thread_send_then_recv",
     "std_tests::sync::mpsc::oneshot_single_thread_try_send_open",
     "std_tests::sync::mpsc::oneshot_single_thread_try_send_closed",
@@ -53,9 +52,7 @@ mpsc_tests = [
     "std_tests::sync::mpsc::oneshot_single_thread_peek_close",
     "std_tests::sync::mpsc::oneshot_single_thread_peek_open",
     "std_tests::sync::mpsc::oneshot_multi_task_recv_then_send",
-    # "std_tests::sync::mpsc::oneshot_multi_task_recv_then_close", needs panic unwind
     "std_tests::sync::mpsc::oneshot_multi_thread_close_stress",
-    #"std_tests::sync::mpsc::oneshot_multi_thread_send_close_stress", needs panic unwind
     "std_tests::sync::mpsc::oneshot_multi_thread_recv_close_stress",
     "std_tests::sync::mpsc::oneshot_multi_thread_send_recv_stress",
     "std_tests::sync::mpsc::stream_send_recv_stress",
@@ -78,24 +75,34 @@ mpsc_tests = [
     "std_tests::sync::mpsc::issue_39364",
 ]
 
-mutex_tests = [ "std_tests::sync::mutex::" + fn_name for fn_name in [
+# Those tests need panic unwind support to pass
+mpsc_tests_panics = [
+    "std_tests::sync::mpsc::oneshot_single_thread_recv_chan_close",
+    "std_tests::sync::mpsc::oneshot_multi_task_recv_then_close",
+    "std_tests::sync::mpsc::oneshot_multi_thread_send_close_stress",
+]
+
+mutex_tests = prepend_mod_path("std_tests::sync::mutex", [
     "smoke",
     "lots_and_lots",
     "try_lock",
     "test_case_into_inner",
     "test_case_into_inner_drop",
-    # "test_case_into_inner_poison", needs panic unwind
     "test_case_get_mut",
-    #"test_case_get_mut_poison", needs panic unwind
     "test_case_mutex_arc_condvar",
-    #"test_case_arc_condvar_poison", needs panic unwind
-    #"test_case_mutex_arc_poison", needs panic unwind
     "test_case_mutex_arc_nested",
-    #"test_case_mutex_arc_access_in_unwind", needs panic unwind
     "test_case_mutex_unsized",
-]]
+])
 
-once_lock_tests = [ "std_tests::sync::once_lock::" + fn_name for fn_name in [
+mutex_tests_panics = prepend_mod_path("std_tests::sync::mutex", [
+    "test_case_into_inner_poison",
+    "test_case_get_mut_poison",
+    "test_case_arc_condvar_poison",
+    "test_case_mutex_arc_poison",
+    "test_case_mutex_arc_access_in_unwind",
+])
+
+once_lock_tests = prepend_mod_path("std_tests::sync::once_lock", [
     "sync_once_cell",
     "sync_once_cell_get_mut",
     # "sync_once_cell_get_unchecked", relies on internal API
@@ -110,14 +117,14 @@ once_lock_tests = [ "std_tests::sync::once_lock::" + fn_name for fn_name in [
     "eval_once_macro",
     "sync_once_cell_does_not_leak_partially_constructed_boxes",
     "dropck",
-]]
+])
 
-once_tests = [ "std_tests::sync::once::" + fn_name for fn_name in [
+once_tests = prepend_mod_path("std_tests::sync::once", [
     "smoke_once",
     "stampede_once",
     "poison_bad",
     "wait_for_force_to_finish",
-]]
+])
 
 remutex_tests = prepend_mod_path("std_tests::sync::remutex", [
     "smoke",
@@ -151,7 +158,6 @@ thread_tests = prepend_mod_path( "std_tests::thread", [
     #"test_invalid_named_thread", [should_panic] is not supported yet
     "test_run_basic",
     "test_is_finished",
-    #"test_join_panic", Needs panic unwind support
     "test_spawn_sched",
     "test_spawn_sched_childs_on_default_sched",
     "test_avoid_copying_the_body_spawn",
@@ -159,10 +165,6 @@ thread_tests = prepend_mod_path( "std_tests::thread", [
     "test_avoid_copying_the_body_join",
     "test_child_doesnt_ref_parent",
     "test_simple_newsched_spawn",
-    #"test_try_panic_message_string_literal", Needs panic unwind support
-    #"test_try_panic_any_message_owned_str", Needs panic unwind support
-    #"test_try_panic_any_message_any", Needs panic unwind support
-    #"test_try_panic_any_message_unit_struct", Needs panic unwind support
     "test_park_unpark_before",
     "test_park_unpark_called_other_thread",
     "test_park_timeout_unpark_before",
@@ -175,6 +177,14 @@ thread_tests = prepend_mod_path( "std_tests::thread", [
     "test_scoped_threads_drop_result_before_join",
     "test_scoped_threads_nll",
     # "scope_join_race", miri specific
+])
+
+thread_tests_panics = prepend_mod_path( "std_tests::thread", [
+    "test_join_panic", # Needs panic unwind support
+    "test_try_panic_message_string_literal", #Needs panic unwind support
+    "test_try_panic_any_message_owned_str", #Needs panic unwind support
+    "test_try_panic_any_message_any", #Needs panic unwind support
+    "test_try_panic_any_message_unit_struct", #Needs panic unwind support
 ])
 
 extra_sync_tests = prepend_mod_path("sync_tests", [
@@ -190,7 +200,17 @@ extra_sync_tests = prepend_mod_path("sync_tests", [
     "run_all_tests",
 ])
 
-all_tests = barrier_tests + condvar_tests + mpsc_tests + mutex_tests + once_lock_tests + extra_sync_tests + thread_tests #+ remutex_tests + rwlock_tests
+panics_tests = mpsc_tests_panics + mutex_tests_panics + thread_tests_panics
+all_tests   = barrier_tests \
+            + condvar_tests \
+            + mpsc_tests \
+            + mutex_tests \
+            + once_lock_tests \
+            + extra_sync_tests \
+            + thread_tests
+#           + panics_tests
+#           + remutex_tests
+#           + rwlock_tests
 
 @pytest.mark.parametrize("test_function", all_tests)
 def test_function(test_function):
